@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Montagem PC Realista: ASUS Q670M-C</title>
+    <style>
+        :root {
+            --bg-body: #121417;
+            --bg-workbench: #25292e;
+            --case-metal: #2c3e50;
+            --mobo-green: #2a5c31; /* Tom de verde aproximado da PCB real */
+            --slot-hover: rgba(52, 152, 219, 0.4);
+            --piece-bg: #ecf0f1;
+            --text-dark: #2c3e50;
+            --success: #2ecc71;
+            --error: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 { margin-bottom: 5px; font-size: 1.8rem; }
+        .instr { color: #bdc3c7; margin-bottom: 25px; text-align: center; max-width: 700px; font-size: 0.95rem;}
+        .mobo-model { font-weight: bold; color: #3498db; }
+
+        .main-wrapper {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            max-width: 1300px;
+        }
+
+        /* --- Bancada de Peças --- */
+        .parts-workbench {
+            flex: 1;
+            min-width: 300px;
+            background-color: var(--bg-workbench);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 15px;
+            height: fit-content;
+        }
+
+        .workbench-title {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #95a5a6;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+
+        .piece {
+            background-color: var(--piece-bg);
+            color: var(--text-dark);
+            padding: 15px;
+            border-radius: 6px;
+            cursor: grab;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+            user-select: none; /* Impede seleção de texto ao arrastar */
+        }
+
+        .piece:hover { transform: translateY(-3px); box-shadow: 0 6px 8px rgba(0,0,0,0.4); background-color: #fff; }
+        .piece:active { cursor: grabbing; transform: scale(0.95); }
+        .piece.dragging { opacity: 0.5; border: 2px dashed #7f8c8d; }
+
+
+        /* --- O Gabinete com a Placa Real --- */
+        .computer-case {
+            width: 600px; /* Aumentado para dar espaço à placa real */
+            height: 650px;
+            background-color: var(--case-metal);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 10px 10px 30px rgba(0,0,0,0.7);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            border: 4px solid #1a252f;
+        }
+
+        /* Área da Placa-Mãe - Usando a Imagem Fornecida */
+        .mobo-area {
+            width: 100%;
+            height: 82%; /* Espaço para PSU embaixo */
+            background-image: url('imagens/placamae.jpg'); /* <--- SUA IMAGEM AQUI */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 4px;
+            position: relative;
+            /*box-shadow: inset 0 0 20px rgba(0,0,0,0.8); Deixa a placa mais escura para o desafio */
+        }
+        
+        /* PSU Shroud (Cobertura da Fonte) - Parte inferior do gabinete */
+        .psu-shroud {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 18%;
+            background-color: #1a1d21;
+            border-top: 4px solid #111;
+            border-radius: 0 0 8px 8px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-sizing: border-box;
+            color: #555;
+            font-size: 0.8rem;
+        }
+
+        /* --- Áreas de Encaixe (Slots) - Invisíveis e Desafiadoras --- */
+        .drop-slot {
+            position: absolute;
+            background-color: transparent; /* Totalmente invisível por padrão */
+            transition: all 0.2s;
+            box-sizing: border-box;
+            cursor: pointer;
+            z-index: 10; /* Garante que fique acima da imagem da mobo */
+        }
+
+        /* Feedback visual apenas no HOVER com peça na mão */
+        .drop-slot.ready-to-drop {
+            border: 2px dashed rgba(255,255,255,0.2);
+        }
+
+        .drop-slot.hovered {
+            background-color: var(--slot-hover);
+            border: 2px solid #3498db;
+            box-shadow: 0 0 10px #3498db;
+        }
+
+        /* Estado quando a peça correta é encaixada */
+        .drop-slot.filled {
+            background-color: rgba(46, 204, 113, 0.8) !important; /* Verde semi-transparente */
+            border: 2px solid #27ae60 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-align: center;
+            overflow: hidden;
+            border-radius: 4px;
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.7);
+        }
+
+        /* --- Mapeamento de Posições (Baseado na foto ASUS Q670M-C) --- 
+           As coordenadas são em % em relação à .mobo-area
+        */
+        
+        /* Socket LGA1700 (Central superior, prateado) */
+        .slot-cpu {
+            width: 12.5%; height: 13.5%;
+            top: 24.5%; left: 45.3%;
+        }
+
+        /* Slots DIMM (Memória RAM - pretos, à direita da CPU) */
+        /* Mapeando a área dos dois slots mais à direita */
+        .slot-ram {
+            width: 6.5%; height: 37%;
+            top: 13.5%; left: 70.8%;
+        }
+
+        /* Slot PCIe x16 (Placa de Vídeo - Longo, preto, abaixo da CPU) */
+        .slot-gpu {
+            width: 44%; height: 3.5%;
+            top: 65.8%; left: 22.2%;
+        }
+
+        /* Conector M.2 (Armazenamento - Pequeno, abaixo da GPU) */
+        /* Mapeando o slot M.2 principal próximo ao centro */
+        .slot-ssd {
+            width: 13%; height: 3.5%;
+            top: 82.5%; left: 22.5%;
+        }
+
+        /* Conector de Força 24-pin (Lateral direita) */
+        .slot-atx24 {
+            width: 4.5%; height: 21%;
+            top: 20%; left: 90.3%;
+        }
+
+        /* Área da Fonte de Alimentação (Na PSU Shroud) */
+        .slot-psu {
+            width: 25%; height: 70%;
+            top: 15%; right: 5%; /* Relativo à .psu-shroud */
+            position: relative; /* Sobrescreve absolute */
+            background-color: rgba(0,0,0,0.6);
+            border: 1px solid #333;
+        }
+
+
+        /* --- Feedback e Botão --- */
+        #feedback-container {
+            margin-top: 30px;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #status-message {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            transition: color 0.3s;
+        }
+
+        button.reset-btn {
+            padding: 12px 30px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background 0.2s, transform 0.1s;
+            display: none; /* Escondido até ganhar */
+            box-shadow: 0 4px 0 #c0392b;
+        }
+
+        button.reset-btn:hover { background-color: #c0392b; }
+        button.reset-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #c0392b; }
+
+        /* --- Responsividade --- */
+        @media (max-width: 950px) {
+            .computer-case {
+                width: 100%;
+                max-width: 500px;
+                height: 550px;
+            }
+            .mobo-area { height: 80%; }
+        }
+
+        @media (max-width: 600px) {
+            .parts-workbench {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .computer-case { height: 450px; padding: 10px;}
+            h1 { font-size: 1.4rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Simulador de Montagem: Hardware Real</h1>
+    <p class="instr">Analise a placa-mãe <span class="mobo-model">ASUS Pro Q670M-C</span> dentro do gabinete. Arraste os componentes da bancada para os conectores corretos na placa. **Não há marcações visíveis!**</p>
+
+    <div class="main-wrapper">
+        <div class="parts-workbench" id="workbench">
+            <div class="workbench-title">Bancada de Componentes</div>
+            <div class="piece" draggable="true" id="cpu">Processador (LGA1700)</div>
+            <div class="piece" draggable="true" id="ram">Memória RAM (DDR4/5)</div>
+            <div class="piece" draggable="true" id="gpu">Placa de Vídeo (PCIe x16)</div>
+            <div class="piece" draggable="true" id="ssd">Armazenamento (M.2 NVMe)</div>
+            <div class="piece" draggable="true" id="atx24">Cabo Força (24-pin ATX)</div>
+            <div class="piece" draggable="true" id="psu">Fonte de Alimentação (PSU)</div>
+        </div>
+
+        <div class="computer-case">
+            <div class="mobo-area">
+                <div class="drop-slot slot-cpu" data-target="cpu"></div>
+                <div class="drop-slot slot-ram" data-target="ram"></div>
+                <div class="drop-slot slot-gpu" data-target="gpu"></div>
+                <div class="drop-slot slot-ssd" data-target="ssd"></div>
+                <div class="drop-slot slot-atx24" data-target="atx24"></div>
+            </div>
+            <div class="psu-shroud">
+                <span>Gabinete ATX Interior</span>
+                <div class="drop-slot slot-psu" data-target="psu"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="feedback-container">
+        <div id="status-message">Aguardando início da montagem...</div>
+        <button class="reset-btn" id="resetBtn" onclick="window.location.reload()">Montar Nova Máquina</button>
+        <a class="reset-btn" id="returnBtn" href="/">Voltar</button>
+    </div>
+
+    <script>
+        const pieces = document.querySelectorAll('.piece');
+        const slots = document.querySelectorAll('.drop-slot');
+        const statusMessage = document.getElementById('status-message');
+        const resetBtn = document.getElementById('resetBtn');
+        const returnBtn = document.getElementById('returnBtn');
+        let correctMatches = 0;
+        const totalPieces = pieces.length;
+
+        // --- Configuração do Drag and Drop ---
+
+        pieces.forEach(piece => {
+            piece.addEventListener('dragstart', dragStart);
+            piece.addEventListener('dragend', dragEnd);
+        });
+
+        slots.forEach(slot => {
+            slot.addEventListener('dragover', dragOver);
+            slot.addEventListener('dragenter', dragEnter);
+            slot.addEventListener('dragleave', dragLeave);
+            slot.addEventListener('drop', dropPiece);
+        });
+
+        // --- Funções de Evento ---
+
+        function dragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.id);
+            this.classList.add('dragging');
+            
+            // Ativa feedback visual sutil em todos os slots válidos
+            slots.forEach(slot => {
+                if (!slot.classList.contains('filled')) {
+                    slot.classList.add('ready-to-drop');
+                }
+            });
+            
+            statusMessage.innerText = `Arrastando: ${this.innerText}... Onde ele encaixa?`;
+            statusMessage.style.color = "white";
+        }
+
+        function dragEnd(e) {
+            this.classList.remove('dragging');
+            // Remove feedback de "pronto" de todos os slots
+            slots.forEach(slot => slot.classList.remove('ready-to-drop'));
+        }
+
+        function dragOver(e) {
+            e.preventDefault(); // Necessário para permitir o drop
+        }
+
+        function dragEnter(e) {
+            e.preventDefault();
+            if (!this.classList.contains('filled')) {
+                this.classList.add('hovered');
+            }
+        }
+
+        function dragLeave(e) {
+            this.classList.remove('hovered');
+        }
+
+        function dropPiece(e) {
+            e.preventDefault();
+            this.classList.remove('hovered');
+            
+            // Pega o ID da peça que está sendo solta
+            const pieceId = e.dataTransfer.getData('text/plain');
+            const targetPieceType = this.getAttribute('data-target');
+            const pieceElement = document.getElementById(pieceId);
+
+            // Validação Severa
+            if (pieceId === targetPieceType && !this.classList.contains('filled')) {
+                // SUCESSO!
+                this.classList.add('filled');
+                // Adiciona o nome curto da peça dentro do slot para confirmar visualmente
+                this.innerText = pieceElement.innerText.split(' ')[0]; 
+                
+                // Esconde a peça original na bancada
+                pieceElement.style.visibility = 'hidden';
+                pieceElement.setAttribute('draggable', 'false');
+                
+                correctMatches++;
+                showTemporaryMessage("Encaixe perfeito!", "var(--success)");
+                checkWin();
+            } else if (this.classList.contains('filled')) {
+                showTemporaryMessage("Este conector já está ocupado.", "#f39c12");
+            } else {
+                // ERRO
+                showTemporaryMessage("Conector incorreto! Analise o formato física da peça e do slot.", "var(--error)");
+                // Adiciona classe de erro temporária no slot
+                this.style.backgroundColor = "rgba(231, 76, 60, 0.5)";
+                setTimeout(() => this.style.backgroundColor = "transparent", 500);
+            }
+        }
+
+        // --- Funções Auxiliares ---
+
+        function checkWin() {
+            if (correctMatches === totalPieces) {
+                statusMessage.innerText = "⚡ PARABÉNS! Você identificou todos os componentes e montou o PC corretamente! ⚡";
+                statusMessage.style.color = "var(--success)";
+                resetBtn.style.display = "inline-block";
+                returnBtn.style.display = "inline-block";
+                // Efeito de brilho final no gabinete
+                document.querySelector('.computer-case').style.boxShadow = "0 0 30px var(--success)";
+            } else {
+                // Atualiza contagem normal (será sobrescrita por mensagens temporárias)
+                statusMessage.innerText = `Componentes instalados: ${correctMatches} / ${totalPieces}`;
+                statusMessage.style.color = "white";
+            }
+        }
+
+        // Exibe mensagem e depois restaura o status da contagem
+        let messageTimeout;
+        function showTemporaryMessage(msg, color) {
+            clearTimeout(messageTimeout); // Cancela timeout anterior se houver
+            statusMessage.innerText = msg;
+            statusMessage.style.color = color;
+            
+            messageTimeout = setTimeout(() => {
+                checkWin(); // Restaura a contagem ou mensagem de vitória
+            }, 2500);
+        }
+        
+        // Inicializa o status
+        checkWin();
+
+    </script>
+</body>
+</html>

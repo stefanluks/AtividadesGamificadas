@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prática de Digitação</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #efefef;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            background: #2d2d2d;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 80%;
+            max-width: 600px;
+        }
+
+        #frase-alvo {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+            color: #aaa;
+            user-select: none;
+        }
+
+        .highlight {
+            color: #4caf50;
+            /* Verde para o que já foi acertado */
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.2rem;
+            border: 2px solid #444;
+            border-radius: 6px;
+            background: #1a1a1a;
+            color: white;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #007bff;
+        }
+
+        .erro-flash {
+            animation: flash 0.2s;
+        }
+
+        @keyframes flash {
+            0% {
+                background-color: #1a1a1a;
+            }
+
+            50% {
+                background-color: #661010;
+            }
+
+            100% {
+                background-color: #1a1a1a;
+            }
+        }
+
+        .img-dica {
+            width: 40%;
+            border-radius: 20px;
+            margin: 25px 0px;
+        }
+
+        /* Camada do Menu de Carregamento */
+        #menu-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            color: white;
+            transition: opacity 0.5s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+        }
+
+        /* Estrutura da Barra de Carregamento */
+        .loader-bar {
+            width: 300px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .loader-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            animation: carregar 2s forwards cubic-bezier(0, 0, 0.58, 1);
+        }
+
+        /* Classe para esconder o menu */
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes carregar {
+            0% {
+                width: 0%;
+            }
+
+            100% {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="menu-container">
+        <h1 id="Titulo">Dominando o teclado</h1>
+        <div class="loader-bar">
+            <div class="loader-fill"></div>
+        </div>
+        <p style="margin-top: 15px; color: #888; font-size: 0.9rem;">Carregando ambiente de treino...</p>
+    </div>
+    <div class="dica">
+        Letra Maiúscula: Segure o <b>SHIFT</b> pressione a Letra e depois solte.
+    </div>
+    <img src="./dedos_no_teclado.jpeg" class="img-dica" alt="posicionamento dos dedos">
+    <div class="container">
+        <div id="frase-alvo">Carregando frase...</div>
+        <input type="text" id="campo-digito" placeholder="Comece a digitar aqui..." autofocus autocomplete="off">
+        <p style="font-size: 0.8rem; color: #666; margin-top: 1rem;">Errou uma letra? Volta do começo!</p>
+    </div>
+
+    <script>
+        const menu = document.getElementById('menu-container');
+        // --- Lógica do Menu ---
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                menu.classList.add('hidden');
+            }, 2000); // 2 segundos de espera
+        });
+
+        function FecharMenu(){
+            setTimeout(() => {
+                menu.classList.add('hidden');
+            }, 2000); // 2 segundos de espera
+        }
+
+        const frases = [
+            "Eu sou aluno do Senai.",
+            "Estou fazendo o curso de operador de computador.",
+            "A informática faz parte do nosso dia a dia.",
+            "O computador precisa de hardware e software para funcionar.",
+            "A prática leva à perfeição.",
+            "Antes só do que mal acompanhado.",
+            "Quem não é visto não é lembrado.",
+            "Água mole em pedra dura tanto bate até que fura.",
+            "O mouse facilita a navegação no sistema.",
+            "O teclado é essencial para digitar textos.",
+            "A memória RAM ajuda na velocidade do computador.",
+            "O processador é o cérebro da máquina.",
+            "O HD armazena arquivos importantes.",
+            "O SSD é mais rápido que o HD.",
+            "A internet conecta pessoas no mundo todo.",
+            "O navegador permite acessar sites.",
+            "É preciso ter cuidado com vírus digitais.",
+            "Backup é melhor do que arrependimento.",
+            "Quem salva tem.",
+            "Atualizar o sistema melhora a segurança.",
+            "O scanner digitaliza documentos.",
+            "A impressora imprime relatórios.",
+            "A webcam é usada em reuniões online.",
+            "O microfone capta o áudio.",
+            "A caixa de som reproduz o som.",
+            "Sem energia o computador não liga.",
+            "A fonte alimenta todos os componentes.",
+            "A placa-mãe conecta tudo.",
+            "O aluno dedicado aprende mais.",
+            "Devagar e sempre se aprende.",
+            "Errar faz parte do aprendizado.",
+            "Formatar resolve muitos problemas.",
+            "Organização evita perda de arquivos.",
+            "Quem não faz backup perde dados.",
+            "A tecnologia evolui todos os dias.",
+            "O Senai prepara para o mercado de trabalho.",
+            "Curso técnico abre portas.",
+            "Conhecimento é poder.",
+            "Treino é treino e jogo é jogo.",
+            "Foco, força e fé.",
+            "Mais vale um arquivo salvo do que dois corrompidos.",
+            "Computador lento ninguém merece.",
+            "Sem internet parece que o mundo para.",
+            "Clique com cuidado.",
+            "Senha forte protege seus dados.",
+            "Nunca compartilhe sua senha.",
+            "Ctrl C e Ctrl V salvam vidas.",
+            "Quem nunca reiniciou não sabe o poder do reset.",
+            "Desligar e ligar resolve quase tudo.",
+            "Organize suas pastas.",
+            "Área de trabalho limpa é sinal de organização.",
+            "Arquivo excluído vai para a lixeira.",
+            "Nem tudo que está na internet é verdade.",
+            "Cuidado com links suspeitos.",
+            "Aprender tecnologia é investir no futuro.",
+            "O operador de computador precisa ser atento.",
+            "Digitar rápido exige prática.",
+            "A informática facilita o trabalho.",
+            "Sem dedicação não há evolução.",
+            "Estudar hoje para trabalhar amanhã.",
+            "Cada tecla tem sua função.",
+            "O Caps Lock altera as letras.",
+            "O Num Lock ativa o teclado numérico.",
+            "Shift ajuda nas letras maiúsculas.",
+            "Alt Tab alterna janelas.",
+            "Ctrl S salva o documento.",
+            "Ctrl P imprime o arquivo.",
+            "Quem procura acha no Google.",
+            "Atualização pendente pode causar erros.",
+            "Computador também precisa de manutenção.",
+            "Limpeza melhora o desempenho.",
+            "Tecnologia é ferramenta, não milagre.",
+            "Quem estuda TI nunca fica parado.",
+            "Internet lenta é teste de paciência.",
+            "Foco no curso, sucesso no futuro.",
+            "Teclado não é piano, mas exige prática.",
+            "Mouse não é rato, mas ajuda muito.",
+            "Não deixe para amanhã o backup de hoje.",
+            "O sistema operacional gerencia o computador.",
+            "A nuvem guarda arquivos online.",
+            "Wi-Fi conectado é alegria.",
+            "Sem sinal, sem conexão.",
+            "Processador rápido melhora o desempenho.",
+            "Memória cheia deixa o PC lento.",
+            "Organização digital é fundamental.",
+            "Evite instalar programas desconhecidos.",
+            "Segurança digital é responsabilidade de todos.",
+            "O conhecimento em informática é diferencial.",
+            "Quem aprende tecnologia sai na frente.",
+            "Reiniciar é a solução universal.",
+            "Tudo começa com um clique.",
+            "Persistência gera resultado.",
+            "A prática em laboratório faz diferença.",
+            "Disciplina é chave do sucesso.",
+            "Operador de computador resolve problemas.",
+            "A tecnologia transforma vidas."
+        ];
+
+        let atual = -1;
+        let fraseAtual = "";
+        const displayFrase = document.getElementById('frase-alvo');
+        const inputDigito = document.getElementById('campo-digito');
+
+        function novaFrase() {
+            if(atual < frases.length){
+                atual++;
+            }else{
+                atual = 0;
+            }
+            fraseAtual = frases[atual];
+            displayFrase.innerText = fraseAtual;
+            inputDigito.value = "";
+        }
+
+        inputDigito.addEventListener('input', () => {
+            const valorDigitado = inputDigito.value;
+
+            // Verifica se o que foi digitado até agora corresponde ao início da frase
+            if (fraseAtual.startsWith(valorDigitado)) {
+                // Se estiver certo, podemos destacar o progresso (opcional)
+                const progresso = fraseAtual.substring(0, valorDigitado.length);
+                const restante = fraseAtual.substring(valorDigitado.length);
+                displayFrase.innerHTML = `<span class="highlight">${progresso}</span>${restante}`;
+
+                // Se terminou a frase
+                if (valorDigitado === fraseAtual) {
+                    menu.classList.remove('hidden');
+                    document.getElementById("Titulo").textContent = "Frase: "+(atual+2);
+                    FecharMenu();
+                    novaFrase();
+                }
+            } else {
+                // Se errou: limpa tudo e dá um feedback visual
+                inputDigito.value = "";
+                displayFrase.innerHTML = fraseAtual;
+                document.body.classList.add('erro-flash');
+                setTimeout(() => document.body.classList.remove('erro-flash'), 200);
+            }
+        });
+
+        // Iniciar
+        novaFrase();
+    </script>
+
+</body>
+
+</html>

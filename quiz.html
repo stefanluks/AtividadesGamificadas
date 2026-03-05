@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz de Hardware: Identifique o Componente</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --dark: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #quiz-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 250px;
+            background-color: #eee;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .image-placeholder img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        h2 { color: var(--dark); margin-bottom: 20px; font-size: 1.2rem; }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        button {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        button:hover:not(:disabled) {
+            border-color: var(--primary);
+            background-color: #f0f7ff;
+        }
+
+        button.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        button.wrong {
+            background-color: var(--error);
+            color: white;
+            border-color: var(--error);
+        }
+
+        #score-board {
+            margin-top: 20px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .next-btn {
+            margin-top: 20px;
+            background-color: var(--dark);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            display: none;
+        }
+        /* Camada do Menu de Carregamento */
+        #menu-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            color: white;
+            transition: opacity 0.5s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+        }
+
+        /* Estrutura da Barra de Carregamento */
+        .loader-bar {
+            width: 300px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .loader-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            animation: carregar 2s forwards cubic-bezier(0, 0, 0.58, 1);
+        }
+        /* Classe para esconder o menu */
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes carregar {
+            0% {
+                width: 0%;
+            }
+
+            100% {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="menu-container">
+        <h1>Dominando os Componentes</h1>
+        <div class="loader-bar">
+            <div class="loader-fill"></div>
+        </div>
+        <p style="margin-top: 15px; color: #888; font-size: 0.9rem;">Carregando ambiente de treino...</p>
+    </div>
+<div id="quiz-container">
+    <div id="game-zone">
+        <h2>Qual é este componente?</h2>
+        <div class="image-placeholder">
+            <img id="component-img" src="" alt="Componente de Hardware">
+        </div>
+        
+        <div class="options-grid" id="options">
+            </div>
+
+        <button class="next-btn" id="next-btn" onclick="nextQuestion()">Próxima Pergunta</button>
+    </div>
+
+    <div id="score-board">
+        Acertos: <span id="hits">0</span> | Perguntas: <span id="total">0</span>
+    </div>
+</div>
+
+<script>
+    const menu = document.getElementById('menu-container');
+     // --- Lógica do Menu ---
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                menu.classList.add('hidden');
+            }, 2000); // 2 segundos de espera
+        });
+
+    const components = [
+        { name: "Plotter", img: "./imagens/image1.png" },
+        { name: "Scanner", img: "./imagens/image2.png"},
+        { name: "Gabinete", img: "./imagens/image3.png"},
+        { name: "Web Cam", img: "./imagens/image4.png"},
+        { name: "Caixas de som", img: "./imagens/image5.png"},
+        { name: "Microfone", img: "./imagens/image6.png"},
+        { name: "Head Set", img: "./imagens/image7.png"},
+        { name: "Processador (CPU)", img: "./imagens/image9.png"},
+        { name: "Memória RAM", img: "./imagens/image12.png"},
+        { name: "Placa-mãe", img: "./imagens/image10.png"},
+        { name: "Disco rígido (HD) ou SSD", img: "./imagens/image11.png"},
+        { name: "Fonte de alimentação", img: "./imagens/image8.png" }
+    ];
+
+    let currentQuestion = {};
+    let hits = 0;
+    let total = 0;
+    let atual = 0;
+
+    function nextQuestion() {
+        document.getElementById('next-btn').style.display = 'none';
+        const optionsContainer = document.getElementById('options');
+        optionsContainer.innerHTML = '';
+        if(atual < components.length){
+            currentQuestion = components[atual];
+            atual++;
+        }else{
+            if(hits == total){
+                alert("Muito bem você acertou todos as questões!");
+                window.location.href = "/AtividadesGamificadas/separar.html";
+            }else{
+                alert("Você conseguiu "+hits+"/"+total+" Tente novamente!");
+                window.location.reload();
+            }
+        }
+        // Seleciona um componente aleatório
+        document.getElementById('component-img').src = currentQuestion.img;
+
+        // Gera alternativas (1 correta + 3 erradas aleatórias)
+        let choices = [currentQuestion.name];
+        while(choices.length < 4) {
+            let randomComp = components[Math.floor(Math.random() * components.length)].name;
+            if(!choices.includes(randomComp)) choices.push(randomComp);
+        }
+        
+        // Embaralha alternativas
+        choices.sort(() => Math.random() - 0.5);
+
+        choices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.innerText = choice;
+            btn.onclick = () => checkAnswer(choice, btn);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selected, btn) {
+        const buttons = document.querySelectorAll('#options button');
+        buttons.forEach(b => b.disabled = true);
+        
+        total++;
+        document.getElementById('total').innerText = total;
+
+        if(selected === currentQuestion.name) {
+            btn.classList.add('correct');
+            hits++;
+            document.getElementById('hits').innerText = hits;
+        } else {
+            btn.classList.add('wrong');
+            // Mostra a correta
+            buttons.forEach(b => {
+                if(b.innerText === currentQuestion.name) b.classList.add('correct');
+            });
+        }
+        
+        document.getElementById('next-btn').style.display = 'inline-block';
+    }
+
+    // Iniciar o jogo
+    nextQuestion();
+</script>
+
+</body>
+</html>

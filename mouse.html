@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dominando o Mouse</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Camada do Menu de Carregamento */
+        #menu-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            color: white;
+            transition: opacity 0.5s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+        }
+
+        /* Estrutura da Barra de Carregamento */
+        .loader-bar {
+            width: 300px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .loader-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            animation: carregar 2s forwards cubic-bezier(0, 0, 0.58, 1);
+        }
+
+        @keyframes carregar {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        canvas {
+            display: block;
+        }
+        
+        /* Classe para esconder o menu */
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .efeito-erro{
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0) 93%, rgb(254, 38, 38) 100%);
+        }
+    </style>
+</head>
+<body>
+<div class="efeito-erro" id="efeito" hidden></div>
+<div id="menu-container">
+    <h1>Dominando o Mouse</h1>
+    <div class="loader-bar">
+        <div class="loader-fill"></div>
+    </div>
+    <p style="margin-top: 15px; color: #888; font-size: 0.9rem;">Carregando ambiente de treino...</p>
+</div>
+
+<canvas id="meuCanvas"></canvas>
+
+<script>
+    const menu = document.getElementById('menu-container');
+    const canvas = document.getElementById('meuCanvas');
+    const ctx = canvas.getContext('2d');
+    let pontos = 0;
+    let corTextoPontos = "black";
+
+    const tamanhoQuadrado = 40;
+    let colunas, linhas;
+    let mouseX = -1, mouseY = -1;
+    let alvoPos = { x: 2, y: 2 };
+
+    // --- Lógica do Menu ---
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            menu.classList.add('hidden');
+        }, 2000); // 2 segundos de espera
+    });
+
+    // --- Lógica do Canvas (Original) ---
+    function ajustarTela() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        colunas = Math.ceil(canvas.width / tamanhoQuadrado);
+        linhas = Math.ceil(canvas.height / tamanhoQuadrado);
+        reposicionarAlvo();
+    }
+
+    function reposicionarAlvo() {
+        alvoPos.x = Math.floor(Math.random() * colunas);
+        alvoPos.y = Math.floor(Math.random() * linhas);
+    }
+
+    function desenhar() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < colunas; i++) {
+            for (let j = 0; j < linhas; j++) {
+                let x = i * tamanhoQuadrado;
+                let y = j * tamanhoQuadrado;
+
+                let cor = "white";
+
+                const mouseEmCima = (
+                    mouseX >= x && mouseX < x + tamanhoQuadrado &&
+                    mouseY >= y && mouseY < y + tamanhoQuadrado
+                );
+
+                if (i === alvoPos.x && j === alvoPos.y) {
+                    cor = mouseEmCima ? "red" : "black";
+                } else if (mouseEmCima) {
+                    cor = "yellow";
+                }
+
+                ctx.fillStyle = cor;
+                ctx.fillRect(x, y, tamanhoQuadrado, tamanhoQuadrado);
+                ctx.strokeStyle = "#ddd";
+                ctx.strokeRect(x, y, tamanhoQuadrado, tamanhoQuadrado);
+            }
+        }
+        ctx.fillStyle = corTextoPontos;
+        ctx.font = "30px Arial bold";
+        ctx.fillText("Pontos: "+pontos, 50, 50);
+        requestAnimationFrame(desenhar);
+    }
+
+    window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    window.addEventListener('mousedown', (e) => {
+        const gridX = Math.floor(e.clientX / tamanhoQuadrado);
+        const gridY = Math.floor(e.clientY / tamanhoQuadrado);
+
+        if (gridX === alvoPos.x && gridY === alvoPos.y) {
+            pontos++;
+            reposicionarAlvo();
+        }else{
+            pontos--;
+            AtivarEfeito();
+        }
+
+        if(pontos >= 30){
+            alert();
+            window.location.href = "/AtividadesGamificadas/teclado.html";
+        }
+    });
+
+    function AtivarEfeito(){
+        corTextoPontos = "red";
+        document.getElementById("efeito").hidden = false;
+        setTimeout(() => {
+            corTextoPontos = "black";
+            document.getElementById("efeito").hidden = true;
+        }, 200);
+    }
+
+    window.addEventListener('resize', ajustarTela);
+
+    ajustarTela();
+    desenhar();
+</script>
+
+</body>
+</html>
