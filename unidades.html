@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastering Bits & Bytes | Tech Academy</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4cc9f0;
+            --success: #4cc9f0;
+            --bg: #f8f9fa;
+            --text: #2b2d42;
+            --white: #ffffff;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 { margin: 0; font-size: 2.5rem; }
+        p.subtitle { opacity: 0.9; font-size: 1.1rem; }
+
+        .card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        h2 { color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+
+        /* Arrastar e Soltar */
+        .drag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .drag-item {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .drop-zone {
+            display: flex;
+            align-items: center;
+            background: var(--bg);
+            margin: 10px 0;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            min-height: 50px;
+        }
+
+        /* Quiz */
+        .quiz-option {
+            display: block;
+            background: var(--bg);
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .quiz-option:hover { background: #e2e8f0; }
+        .selected { background: var(--accent) !important; color: white; }
+
+        /* Animação Frequência */
+        .cpu-visual {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .wave {
+            width: 10px;
+            height: 50px;
+            background: var(--accent);
+            margin: 0 2px;
+            animation: pulse 1s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { height: 10px; opacity: 0.3; }
+            50% { height: 70px; opacity: 1; }
+        }
+
+        /* Botões */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .btn:hover { background: var(--secondary); transform: translateY(-2px); }
+
+        .score-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--text);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        /* Jogo de Associação */
+        .match-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .match-btn {
+            padding: 10px;
+            border: 1px solid var(--primary);
+            background: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .matched { background: #d1fae5 !important; border-color: #10b981 !important; cursor: default; }
+
+    </style>
+</head>
+<body>
+
+<div class="score-box">Pontos: <span id="totalScore">0</span></div>
+
+<div class="container">
+    <header>
+        <h1>💻 Unidades de Medida</h1>
+        <p class="subtitle">Entenda o tamanho e a velocidade do mundo digital</p>
+    </header>
+
+    <section class="card">
+        <h2>📦 1. Escala de Armazenamento</h2>
+        <p>Arraste a unidade correta para sua descrição:</p>
+        
+        <div class="drag-container" id="source-units">
+            <div class="drag-item" draggable="true" id="bit">bit</div>
+            <div class="drag-item" draggable="true" id="byte">Byte</div>
+            <div class="drag-item" draggable="true" id="kb">KB</div>
+            <div class="drag-item" draggable="true" id="mb">MB</div>
+            <div class="drag-item" draggable="true" id="gb">GB</div>
+            <div class="drag-item" draggable="true" id="tb">TB</div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <div class="drop-zone" data-answer="bit">A menor unidade (0 ou 1)</div>
+            <div class="drop-zone" data-answer="byte">Conjunto de 8 bits (representa um caractere)</div>
+            <div class="drop-zone" data-answer="kb">Cerca de mil Bytes (um documento de texto leve)</div>
+            <div class="drop-zone" data-answer="mb">Cerca de 1 milhão de Bytes (uma foto MP3 ou foto)</div>
+            <div class="drop-zone" data-answer="gb">Cerca de 1 bilhão de Bytes (um filme em HD)</div>
+            <div class="drop-zone" data-answer="tb">Cerca de 1 trilhão de Bytes (HDs externos modernos)</div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>🧠 2. Desafio Rápido (Quiz)</h2>
+        <div id="quiz-container">
+            </div>
+    </section>
+
+    <section class="card">
+        <h2>⚡ 3. Frequência (Clock do Processador)</h2>
+        <p>A frequência mede quantos ciclos (ações) um processador faz por segundo. Ela é medida em <strong>Hertz (Hz)</strong>.</p>
+        
+        <div class="cpu-visual" id="freq-visual">
+            </div>
+
+        <div style="display: flex; justify-content: space-around; margin-top: 15px; text-align: center;">
+            <div><strong>Hz</strong><br>1 ciclo/s</div>
+            <div><strong>kHz</strong><br>1.000 ciclos/s</div>
+            <div><strong>MHz</strong><br>1 milhão/s</div>
+            <div><strong>GHz</strong><br>1 bilhão/s</div>
+        </div>
+        <p style="font-size: 0.9rem; color: #666; margin-top: 15px;">Quanto mais GHz, mais rápido o processador consegue "pensar"!</p>
+    </section>
+
+    <section class="card">
+        <h2>🔗 4. O que mede o quê?</h2>
+        <p>Relacione os pares clicando em um de cada coluna:</p>
+        <div class="match-grid" id="match-game">
+            </div>
+    </section>
+
+    <div style="text-align: center; margin-bottom: 50px;">
+        <a class="btn" href="./unidades2.html">Próxima Atividade</a>
+    </div>
+</div>
+
+<script>
+    let score = 0;
+    const scoreEl = document.getElementById('totalScore');
+
+    function updateScore(points) {
+        score += points;
+        scoreEl.innerText = score;
+    }
+
+    // --- Lógica Drag and Drop ---
+    const draggables = document.querySelectorAll('.drag-item');
+    const dropZones = document.querySelectorAll('.drop-zone');
+
+    draggables.forEach(drag => {
+        drag.addEventListener('dragstart', () => drag.classList.add('dragging'));
+        drag.addEventListener('dragend', () => drag.classList.remove('dragging'));
+    });
+
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', e => e.preventDefault());
+        zone.addEventListener('drop', e => {
+            const id = document.querySelector('.dragging').id;
+            if (id === zone.dataset.answer && !zone.classList.contains('correct')) {
+                zone.classList.add('correct');
+                zone.style.background = "#d1fae5";
+                zone.style.borderStyle = "solid";
+                zone.innerHTML = `✅ <strong>${id.toUpperCase()}</strong>: ${zone.innerText}`;
+                document.getElementById(id).style.visibility = "hidden";
+                updateScore(10);
+            }
+        });
+    });
+
+    // --- Lógica Quiz ---
+    const quizData = [
+        { q: "Quantos bits existem em 1 Byte?", a: ["4", "8", "10", "1024"], c: 1 },
+        { q: "Qual unidade é maior?", a: ["MB", "KB", "GB", "TB"], c: 3 },
+        { q: "Um pendrive comum hoje em dia geralmente tem:", a: ["16 bits", "32 GB", "2 TB", "500 MHz"], c: 1 },
+        { q: "A velocidade de um processador é medida em:", a: ["Gigabytes", "Hertz", "Pixels", "Watts"], c: 1 },
+        { q: "Se uma foto tem 5MB, quantas cabem (aprox) em 1GB?", a: ["2", "20", "200", "2000"], c: 2 }
+    ];
+
+    const quizContainer = document.getElementById('quiz-container');
+    quizData.forEach((item, index) => {
+        let qHtml = `<div style="margin-bottom:20px;"><strong>${index+1}. ${item.q}</strong><br>`;
+        item.a.forEach((opt, i) => {
+            qHtml += `<div class="quiz-option" onclick="checkQuiz(this, ${index}, ${i})">${opt}</div>`;
+        });
+        qHtml += `</div>`;
+        quizContainer.innerHTML += qHtml;
+    });
+
+    function checkQuiz(el, qIdx, choice) {
+        if (el.parentNode.dataset.answered) return;
+        if (choice === quizData[qIdx].c) {
+            el.style.background = "#10b981";
+            el.style.color = "white";
+            updateScore(15);
+        } else {
+            el.style.background = "#ef4444";
+            el.style.color = "white";
+        }
+        el.parentNode.dataset.answered = "true";
+    }
+
+    // --- Animação Frequência ---
+    const visual = document.getElementById('freq-visual');
+    for (let i = 0; i < 40; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'wave';
+        bar.style.animationDelay = `${i * 0.05}s`;
+        visual.appendChild(bar);
+    }
+
+    // --- Jogo de Associação ---
+    const terms = [
+        {txt: "GHz", pair: 1}, {txt: "Processador", pair: 1},
+        {txt: "MB", pair: 2}, {txt: "Arquivo de Foto", pair: 2},
+        {txt: "TB", pair: 3}, {txt: "Disco Rígido (HD)", pair: 3},
+        {txt: "Hz", pair: 4}, {txt: "Ciclos por segundo", pair: 4}
+    ].sort(() => Math.random() - 0.5);
+
+    const matchGrid = document.getElementById('match-game');
+    let firstCard = null;
+
+    terms.forEach((item, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'match-btn';
+        btn.innerText = item.txt;
+        btn.onclick = () => {
+            if (btn.classList.contains('matched')) return;
+            btn.style.background = "#4cc9f0";
+            if (!firstCard) {
+                firstCard = { item, btn };
+            } else {
+                if (firstCard.item.pair === item.pair && firstCard.btn !== btn) {
+                    btn.classList.add('matched');
+                    firstCard.btn.classList.add('matched');
+                    btn.innerText = "✅ " + btn.innerText;
+                    updateScore(20);
+                } else {
+                    const b1 = firstCard.btn;
+                    const b2 = btn;
+                    setTimeout(() => { 
+                        b1.style.background = ""; 
+                        b2.style.background = ""; 
+                    }, 400);
+                }
+                firstCard = null;
+            }
+        };
+        matchGrid.appendChild(btn);
+    });
+
+</script>
+
+</body>
+</html>

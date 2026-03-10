@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔢 Medidas da Informática: Bits, Bytes e Hertz</title>
+    <!-- Fontes e ícones -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(145deg, #0d1b2f 0%, #1b2b41 100%);
+            font-family: 'Quicksand', sans-serif;
+            min-height: 100vh;
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1300px;
+            width: 100%;
+        }
+        h1 {
+            color: #f0f4fa;
+            font-weight: 700;
+            font-size: 2.8rem;
+            text-align: center;
+            text-shadow: 0 4px 10px rgba(0,20,50,0.7);
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        .subh {
+            text-align: center;
+            color: #b0c9e8;
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin-bottom: 40px;
+            border-bottom: 2px dashed #3e5a7a;
+            padding-bottom: 15px;
+        }
+        .subh i {
+            margin: 0 12px;
+            color: #ffd966;
+        }
+        /* grade de cards */
+        .grid-activities {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 40px 40px 30px 30px;
+            padding: 25px 20px 20px 20px;
+            box-shadow: 0 25px 40px -10px rgba(0,0,0,0.6);
+            transition: all 0.2s ease;
+            color: #eef4ff;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: #6c8bb8;
+            box-shadow: 0 30px 50px -5px #030b14;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            font-size: 1.9rem;
+        }
+        .card-header i {
+            background: #2e3f5e;
+            padding: 15px;
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px #4e71a3;
+        }
+        .card-header h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #ffeb99;
+        }
+        /* área interativa */
+        .activity-zone {
+            background: #0c1829c9;
+            border-radius: 28px;
+            padding: 20px 15px;
+            margin: 15px 0;
+            border: 1px solid #2b4b74;
+            flex-grow: 1;
+        }
+        .btn-fun {
+            background: #306cac;
+            border: none;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: 0 7px 0 #14345c;
+            margin: 8px 6px 8px 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-fun:active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #14345c;
+        }
+        .btn-fun.secondary {
+            background: #4f628d;
+            box-shadow: 0 5px 0 #2a364f;
+        }
+        .btn-fun.special {
+            background: #9b6f3c;
+            box-shadow: 0 5px 0 #624a27;
+        }
+        .resp-output {
+            background: #010e1a;
+            border-radius: 24px;
+            padding: 15px;
+            margin: 15px 0 5px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            font-size: 1.3rem;
+            color: #b7e4fa;
+            border-left: 8px solid #ffb347;
+            word-break: break-word;
+        }
+        .mini-tag {
+            background: #1e344b;
+            display: inline-block;
+            border-radius: 30px;
+            padding: 4px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #b1d0ff;
+            margin-bottom: 8px;
+        }
+        /* Tabela dinâmica / conversor */
+        .hz-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #02101e;
+            border-radius: 50px;
+            padding: 5px 10px 5px 25px;
+        }
+        .freq-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffbe5c;
+        }
+        .slider-container {
+            width: 100%;
+            margin: 20px 0;
+        }
+        input[type=range] {
+            width: 100%;
+            height: 12px;
+            background: linear-gradient(90deg, #1e90ff, #ff6ec7);
+            border-radius: 20px;
+            -webkit-appearance: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 25px;
+            height: 25px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 15px cyan;
+            border: 2px solid #002bff;
+            cursor: pointer;
+        }
+        .byte-ball {
+            display: inline-block;
+            width: 45px;
+            height: 45px;
+            line-height: 45px;
+            text-align: center;
+            border-radius: 50%;
+            background: #195a8f;
+            margin: 5px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+            box-shadow: 0 0 0 2px #aad0ff;
+        }
+        .byte-ball.bit {
+            background: #bc6c25;
+        }
+        footer {
+            text-align: center;
+            color: #7d9bc3;
+            margin-top: 30px;
+        }
+        hr {
+            border: 1px solid #25415b;
+            margin: 25px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>💾 Bit, Byte, GB, MB, TB & ⚡ Hertz</h1>
+    <div class="subh">
+        <i class="fas fa-computer"></i> atividades criativas e dinâmicas <i class="fas fa-microchip"></i>
+    </div>
+
+    <!-- GRADE DE ATIVIDADES -->
+    <div class="grid-activities">
+        
+        <!-- CARD 1: Bit vs Byte (construtor de bytes) -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-toggle-off"></i>
+                <h2>Bit / Byte</h2>
+            </div>
+            <div class="activity-zone">
+                <div class="mini-tag"><i class="far fa-hand-pointer"></i> monte seu byte</div>
+                <div id="bitDisplay" style="margin-bottom: 15px;">
+                    <!-- 8 bits interativos -->
+                </div>
+                <p style="font-weight: 300; margin-bottom: 8px;">👉 Clique nos bits para alternar 0/1</p>
+                <div class="resp-output" id="byteValue">Byte: 0 0 0 0 0 0 0 0</div>
+                <button class="btn-fun" id="randomByteBtn"><i class="fas fa-dice"></i> byte aleatório</button>
+                <button class="btn-fun secondary" id="resetBitsBtn"><i class="fas fa-undo-alt"></i> zerar bits</button>
+                <p style="margin-top: 15px;"><strong>Valor do byte:</strong> <span id="byteDecimal">0</span> (decimal)</p>
+            </div>
+            <p style="font-size: 0.9rem; opacity: 0.8;"><i class="fas fa-lightbulb"></i> 8 bits = 1 byte. Brinque com os valores!</p>
+        </div>
+
+        <!-- CARD 2: KB, MB, GB, TB (conversor maluco) -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-weight-hanging"></i>
+                <h2>KB · MB · GB · TB</h2>
+            </div>
+            <div class="activity-zone">
+                <div class="mini-tag"><i class="fas fa-arrows-spin"></i> conversor criativo</div>
+                <label>📁 Digite em <strong>bytes</strong>:</label>
+                <input type="number" id="inputBytes" value="1048576" min="0" step="1" style="width:100%; padding:14px; border-radius:60px; border: none; background:#02182b; color: white; font-weight:600; margin:10px 0; font-size:1.2rem;">
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;">
+                    <button class="btn-fun" id="convKB"><i class="fas fa-calculator"></i> em KB</button>
+                    <button class="btn-fun" id="convMB"><i class="fas fa-calculator"></i> em MB</button>
+                    <button class="btn-fun" id="convGB"><i class="fas fa-calculator"></i> em GB</button>
+                    <button class="btn-fun" id="convTB"><i class="fas fa-calculator"></i> em TB</button>
+                </div>
+                <div class="resp-output" id="conversionResult">⚡ 1.048.576 bytes = 1 MB</div>
+                <p style="margin-top: 10px; font-size:0.9rem;">💡 base 1024 (binário) — padrão informática</p>
+            </div>
+        </div>
+
+        <!-- CARD 3: Frequência Hertz (dinâmico) -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-wave-square"></i>
+                <h2>Hertz (Hz)</h2>
+            </div>
+            <div class="activity-zone">
+                <div class="mini-tag"><i class="fas fa-sliders"></i> controlador de frequência</div>
+                <div class="hz-bar">
+                    <span class="freq-value" id="freqDisplay">2.5 GHz</span>
+                    <i class="fas fa-circle-notch fa-spin" style="font-size: 2rem; color: #fedb88;"></i>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="freqSlider" min="1" max="5000" value="2500">
+                </div>
+                <div style="display: flex; justify-content: space-between; color:#95bae4;">
+                    <span>1 Hz</span><span>500 GHz</span>
+                </div>
+                <div style="margin-top: 20px; display: flex; gap:10px; flex-wrap: wrap;">
+                    <button class="btn-fun special" id="hzToKHz"><i class="fas fa-arrow-right"></i> converter para kHz</button>
+                    <button class="btn-fun special" id="hzToMHz"><i class="fas fa-arrow-right"></i> para MHz</button>
+                    <button class="btn-fun special" id="hzToGHz"><i class="fas fa-arrow-right"></i> para GHz</button>
+                </div>
+                <div class="resp-output" id="hertzConvertido">2.500 MHz = 2,5 GHz</div>
+                <p><i class="fas fa-microchip"></i> Hertz: ciclos por segundo</p>
+            </div>
+        </div>
+
+        <!-- CARD 4: Jogo das unidades (ordenação maluca) -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-sort-amount-up"></i>
+                <h2>Ordenação</h2>
+            </div>
+            <div class="activity-zone">
+                <div class="mini-tag"><i class="fas fa-brain"></i> coloque em ordem crescente</div>
+                <div id="unidadesContainer" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0;">
+                    <!-- itens gerados via js -->
+                </div>
+                <button class="btn-fun" id="verificarOrdem"><i class="fas fa-check-double"></i> verificar ordem</button>
+                <button class="btn-fun secondary" id="embaralharUnidades"><i class="fas fa-shuffle"></i> embaralhar</button>
+                <div class="resp-output" id="feedbackOrdem" style="font-size: 1.1rem;">🔀 arraste os cards?</div>
+                <p style="margin-top:5px;"><small>Clique nos blocos para selecionar sequência</small></p>
+            </div>
+        </div>
+
+        <!-- CARD 5: Comparação divertida (byte vs hertz) -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-balance-scale-left"></i>
+                <h2>Comparação maluca</h2>
+            </div>
+            <div class="activity-zone">
+                <p>⚡ <strong>qual é maior?</strong> (verdadeiro ou falso)</p>
+                <div id="quizArea" style="background: #02101e; border-radius: 30px; padding: 15px; margin: 10px 0;">
+                    <span id="quizPergunta" style="font-size: 1.5rem;">1 GB > 1.000 MB?</span>
+                </div>
+                <div>
+                    <button class="btn-fun" id="quizVerdadeiro"><i class="fas fa-check"></i> verdadeiro</button>
+                    <button class="btn-fun secondary" id="quizFalso"><i class="fas fa-times"></i> falso</button>
+                    <button class="btn-fun special" id="novaPergunta"><i class="fas fa-sync-alt"></i> nova</button>
+                </div>
+                <div class="resp-output" id="quizFeedback">Clique em V ou F</div>
+            </div>
+        </div>
+
+        <!-- CARD 6: Medidor de armazenamento (dinâmico com TB) -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-database"></i>
+                <h2>Capacidade TB</h2>
+            </div>
+            <div class="activity-zone">
+                <div class="mini-tag"><i class="fas fa-hard-drive"></i> HD cheio de dados</div>
+                <p><span id="tbAtual">2.5</span> TB ocupados de 4 TB</p>
+                <progress value="2.5" max="4" style="width:100%; height:30px; border-radius:30px;"></progress>
+                <div style="display: flex; gap:10px; margin-top: 20px; flex-wrap:wrap;">
+                    <button class="btn-fun" id="addGB"><i class="fas fa-plus-circle"></i> +200 GB</button>
+                    <button class="btn-fun secondary" id="addMB"><i class="fas fa-plus-circle"></i> +50.000 MB</button>
+                    <button class="btn-fun special" id="resetHD"><i class="fas fa-trash"></i> reset</button>
+                </div>
+                <p id="ocupadoText" style="margin-top: 10px;">ocupado: 2,5 TB (62,5%)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Área de curiosidade extra -->
+    <hr>
+    <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; background: #102331; border-radius: 60px; padding: 20px; color: white;">
+        <span><i class="fas fa-memory"></i> 1 byte = 8 bits</span>
+        <span><i class="fas fa-tachometer-alt"></i> 1 kHz = 1000 Hz</span>
+        <span><i class="fas fa-cloud"></i> 1 TB = 1024 GB</span>
+        <span><i class="fas fa-clock"></i> 1 GHz = 1e9 Hz</span>
+    </div>
+    <footer>💡 clique, arraste, converta – unidades de medida da informática</footer>
+</div>
+
+<script>
+    (function() {
+        // ---------- CARD 1: bits interativos ----------
+        const bitDisplay = document.getElementById('bitDisplay');
+        let bits = [0,0,0,0,0,0,0,0];
+        function renderBits() {
+            let html = '';
+            bits.forEach((b, i) => {
+                html += `<div class="byte-ball ${b===1?'bit':''}" data-index="${i}" style="cursor:pointer; background: ${b===1 ? '#e68a2e' : '#195a8f'}">${b}</div>`;
+            });
+            bitDisplay.innerHTML = html;
+            document.querySelectorAll('.byte-ball').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    const idx = e.currentTarget.dataset.index;
+                    bits[idx] = bits[idx] === 1 ? 0 : 1;
+                    updateByteDisplay();
+                });
+            });
+            const byteStr = bits.join(' ');
+            document.getElementById('byteValue').innerText = `Byte: ${byteStr}`;
+            const decimal = bits.reduce((acc, b, idx) => acc + (b << (7-idx)), 0);
+            document.getElementById('byteDecimal').innerText = decimal;
+        }
+        function updateByteDisplay() { renderBits(); }
+        renderBits();
+        document.getElementById('randomByteBtn').addEventListener('click', () => {
+            bits = bits.map(() => Math.round(Math.random()));
+            renderBits();
+        });
+        document.getElementById('resetBitsBtn').addEventListener('click', () => {
+            bits = [0,0,0,0,0,0,0,0];
+            renderBits();
+        });
+
+        // ---------- CARD 2: conversor KB, MB, GB, TB ----------
+        const inputBytes = document.getElementById('inputBytes');
+        const convResult = document.getElementById('conversionResult');
+        function formatBytes(value, unit) {
+            let bytes = parseFloat(value) || 0;
+            let result;
+            if (unit === 'KB') result = bytes / 1024;
+            else if (unit === 'MB') result = bytes / (1024**2);
+            else if (unit === 'GB') result = bytes / (1024**3);
+            else if (unit === 'TB') result = bytes / (1024**4);
+            return result.toFixed(6) + ' ' + unit;
+        }
+        document.getElementById('convKB').addEventListener('click', () => {
+            convResult.innerText = `${inputBytes.value} bytes = ` + formatBytes(inputBytes.value, 'KB');
+        });
+        document.getElementById('convMB').addEventListener('click', () => {
+            convResult.innerText = `${inputBytes.value} bytes = ` + formatBytes(inputBytes.value, 'MB');
+        });
+        document.getElementById('convGB').addEventListener('click', () => {
+            convResult.innerText = `${inputBytes.value} bytes = ` + formatBytes(inputBytes.value, 'GB');
+        });
+        document.getElementById('convTB').addEventListener('click', () => {
+            convResult.innerText = `${inputBytes.value} bytes = ` + formatBytes(inputBytes.value, 'TB');
+        });
+
+        // ---------- CARD 3: Hertz ----------
+        const slider = document.getElementById('freqSlider');
+        const freqDisplay = document.getElementById('freqDisplay');
+        const hertzConvertido = document.getElementById('hertzConvertido');
+        function updateFreq() {
+            let val = parseInt(slider.value); // em MHz *10? estamos tratando como base em *10^6
+            let hz = val * 1e6; // consideramos que slider representa MHz * 1? para ficar didático
+            // melhor: slider representa valor em milhões de Hz (MHz * 1)
+            freqDisplay.innerText = (val/1000).toFixed(2) + ' GHz';
+            hertzConvertido.innerText = val.toLocaleString() + ' MHz = ' + (val/1000).toFixed(3) + ' GHz';
+        }
+        slider.addEventListener('input', updateFreq);
+        updateFreq();
+        document.getElementById('hzToKHz').addEventListener('click', () => {
+            let mhz = slider.value;
+            let khz = mhz * 1000;
+            hertzConvertido.innerText = `${mhz} MHz = ${khz.toLocaleString()} kHz`;
+        });
+        document.getElementById('hzToMHz').addEventListener('click', () => {
+            hertzConvertido.innerText = `${slider.value} MHz (direto)`;
+        });
+        document.getElementById('hzToGHz').addEventListener('click', () => {
+            let ghz = slider.value / 1000;
+            hertzConvertido.innerText = `${slider.value} MHz = ${ghz.toFixed(4)} GHz`;
+        });
+
+        // ---------- CARD 4: ordenação ----------
+        const container = document.getElementById('unidadesContainer');
+        let unidades = ['bit', 'Byte', 'KB', 'MB', 'GB', 'TB'];
+        let selecionados = [];
+        function renderUnidades() {
+            let html = '';
+            unidades.forEach(u => {
+                let selectedClass = selecionados.includes(u) ? 'selected-unit' : '';
+                html += `<div class="byte-ball" style="width:auto; padding:0 20px; border-radius:40px; background:${selecionados.includes(u)?'#c2752c':'#1e4b77'}; cursor:pointer;" data-unit="${u}">${u}</div>`;
+            });
+            container.innerHTML = html;
+            document.querySelectorAll('#unidadesContainer div').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    const unit = e.currentTarget.dataset.unit;
+                    if (selecionados.includes(unit)) {
+                        selecionados = selecionados.filter(u => u !== unit);
+                    } else {
+                        selecionados.push(unit);
+                    }
+                    renderUnidades();
+                });
+            });
+        }
+        renderUnidades();
+        document.getElementById('embaralharUnidades').addEventListener('click', () => {
+            unidades.sort(() => Math.random() - 0.5);
+            selecionados = [];
+            renderUnidades();
+        });
+        document.getElementById('verificarOrdem').addEventListener('click', () => {
+            let ordemCorreta = ['bit','Byte','KB','MB','GB','TB'];
+            if (selecionados.length !== ordemCorreta.length) {
+                document.getElementById('feedbackOrdem').innerText = '❌ Selecione todas as unidades em ordem crescente!';
+                return;
+            }
+            let acertou = selecionados.every((val, idx) => val === ordemCorreta[idx]);
+            document.getElementById('feedbackOrdem').innerHTML = acertou ? '✅ Perfeito! bit < Byte < KB < MB < GB < TB' : '❌ Não está na ordem crescente (bit, Byte, KB, MB, GB, TB)';
+        });
+
+        // ---------- CARD 5: quiz comparacao ----------
+        const perguntas = [
+            {texto: '1 GB é maior que 1.000 MB?', resp: true},
+            {texto: '1 TB equivale a 1024 GB', resp: true},
+            {texto: '1 Byte é maior que 1 bit?', resp: true},
+            {texto: '1 MB = 1.048.576 bytes', resp: true},
+            {texto: '10 MHz é igual a 10.000 kHz', resp: true},
+            {texto: '1 KB tem 1000 bytes', resp: false},
+            {texto: '1 GHz são 100 MHz', resp: false},
+            {texto: '5000 MHz é 5 GHz', resp: true},
+            {texto: '1 TB = 1000 GB (decimal) mas para informática 1024', resp: true}, // verdade
+        ];
+        let perguntaAtual = perguntas[0];
+        document.getElementById('quizPergunta').innerText = perguntaAtual.texto + '?';
+        document.getElementById('novaPergunta').addEventListener('click', () => {
+            perguntaAtual = perguntas[Math.floor(Math.random() * perguntas.length)];
+            document.getElementById('quizPergunta').innerText = perguntaAtual.texto + '?';
+            document.getElementById('quizFeedback').innerText = '🤔 Escolha V ou F';
+        });
+        document.getElementById('quizVerdadeiro').addEventListener('click', () => {
+            document.getElementById('quizFeedback').innerHTML = perguntaAtual.resp ? '✅ Correto!' : '❌ Errado!';
+        });
+        document.getElementById('quizFalso').addEventListener('click', () => {
+            document.getElementById('quizFeedback').innerHTML = !perguntaAtual.resp ? '✅ Correto!' : '❌ Errado!';
+        });
+
+        // ---------- CARD 6: medidor TB ----------
+        let totalGB = 2.5 * 1024; // 2.5 TB em GB
+        const progress = document.querySelector('progress');
+        const tbAtualSpan = document.getElementById('tbAtual');
+        const ocupadoText = document.getElementById('ocupadoText');
+        function atualizarHD() {
+            let tb = totalGB / 1024;
+            tbAtualSpan.innerText = tb.toFixed(2);
+            progress.value = tb;
+            ocupadoText.innerText = `ocupado: ${tb.toFixed(2)} TB (${(tb/4*100).toFixed(1)}%)`;
+        }
+        document.getElementById('addGB').addEventListener('click', () => {
+            totalGB = Math.min(4*1024, totalGB + 200);
+            atualizarHD();
+        });
+        document.getElementById('addMB').addEventListener('click', () => {
+            totalGB = Math.min(4*1024, totalGB + (50000/1024));
+            atualizarHD();
+        });
+        document.getElementById('resetHD').addEventListener('click', () => {
+            totalGB = 0.5 * 1024; // 0.5 TB
+            atualizarHD();
+        });
+        atualizarHD();
+    })();
+</script>
+</body>
+</html>
